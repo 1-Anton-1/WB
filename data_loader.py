@@ -1,6 +1,8 @@
 import warnings
 import pandas as pd
 import torch
+import os
+
 from transformers import AutoTokenizer, AutoModel
 
 
@@ -34,6 +36,9 @@ df_knowledge_base['embeddings'] = df_knowledge_base['chunk'].apply(get_embedding
 min_length = min(len(embed) for embed in df_knowledge_base['embeddings'])
 df_knowledge_base['embeddings'] = df_knowledge_base['embeddings'].apply(lambda x: x[:min_length])
 
+# Создание директории 'data', если она не существует
+if not os.path.exists('data'):
+    os.makedirs('data')
 
 # Функция для сохранения DataFrame в формат .pkl
 def save_df_to_pickle(df, filename):
