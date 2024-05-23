@@ -1,85 +1,30 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
+    <meta charset="UTF-8"> <!-- Применяем кодировку UTF-8 -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FastAPI Web App</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #ffffff;
-            color: #4a148c;
-            text-align: center;
-            margin: 0;
-            padding: 0;
-        }
-
-        h1 {
-            background-color: #4a148c;
-            color: #ffffff;
-            padding: 20px;
-            margin: 0;
-        }
-
-        #question-container {
-            margin: 20px;
-        }
-
-        label {
-            font-weight: bold;
-        }
-
-        input[type="text"] {
-            width: 300px;
-            padding: 10px;
-            border: 2px solid #4a148c;
-            border-radius: 5px;
-            margin-right: 10px;
-        }
-
-        button {
-            background-color: #4a148c;
-            color: #ffffff;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-
-        button:hover {
-            background-color: #6a1b9a;
-        }
-
-        #loader {
-            border: 8px solid #f3f3f3;
-            border-radius: 50%;
-            border-top: 8px solid #4a148c;
-            width: 60px;
-            height: 60px;
-            animation: spin 2s linear infinite;
-            display: none;
-            margin: 20px auto;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        #answer, #execution_time {
-            margin: 20px;
-        }
-    </style>
+    <!-- Открыть на главной странице и расшарить по всей ширине -->
+    <title>QA_system</title>  <!-- Название вкладки при открытии в браузере -->
+    <link rel="stylesheet" type="text/css" href="/static/style.css">
     <script>
         async function sendQuery() {
             const question = document.getElementById("question").value;
             const loader = document.getElementById("loader");
+            const messageContainer = document.getElementById("message-container");
+            const messageElem = document.getElementById("message");
             const answerElem = document.getElementById("answer");
+            const answerTitleElem = document.getElementById("answer-title");
             const executionTimeElem = document.getElementById("execution_time");
+            const expertAnswerContainer = document.getElementById("expert-answer-container");
+            const expertAnswerElem = document.getElementById("expert-answer");
+            const questionflag = document.getElementById("question_flag");
+            const answerflag = document.getElementById("answer_flag");
 
             // Скрываем предыдущий ответ и показываем загрузчик
+            messageContainer.style.display = "none";
             answerElem.style.display = "none";
             executionTimeElem.style.display = "none";
+            expertAnswerContainer.style.display = "none";
             loader.style.display = "block";
 
             const response = await fetch(`/query?question=${encodeURIComponent(question)}`);
@@ -87,26 +32,90 @@
 
             // Скрываем загрузчик и показываем ответ
             loader.style.display = "none";
+
+            if (data.message) {
+                messageElem.innerText = data.message;
+                messageContainer.style.display = "block";
+                answerTitleElem.innerText = "Ответ из базы вопросов-ответов:";
+            } else {
+                messageContainer.style.display = "none";
+                answerTitleElem.innerText = "Ответ:";
+            }
+
             answerElem.innerText = data.answer;
             executionTimeElem.innerText = `Время исполнения: ${data.execution_time.toFixed(2)} секунд`;
             answerElem.style.display = "block";
             executionTimeElem.style.display = "block";
+
+            if (data.expert_answer) {
+                expertAnswerElem.innerText = data.expert_answer;
+                expertAnswerContainer.style.display = "block";
+            } else {
+                expertAnswerContainer.style.display = "none";
+            }
         }
     </script>
 </head>
 <body>
-    <h1>FastAPI Web App</h1>
-    <div id="question-container">
-        <label for="question">Вопрос:</label>
-        <input type="text" id="question" name="question">
-        <button onclick="sendQuery()">Отправить</button>
-    </div>
-    <div id="loader"></div>
-    <div>
-        <h2>Ответ:</h2>
-        <p id="answer"></p>
-        <h2>Время выполнения:</h2>
-        <p id="execution_time"></p>
-    </div>
+<h1>QA_system</h1>
+
+<!-- Таблица случайных вопросов из df_QA_pairs -->
+<div>
+    <!--    <h2>Случайные вопросы из QA Pairs:</h2>-->
+    <table>
+        <thead>
+        <tr>
+            <th>Случайные вопросы для сравнения с ответами экспертов:</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for question in random_questions_QA_pairs %}
+        <tr>
+            <td>{{ question }}</td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Таблица случайных вопросов из df_BQA -->
+<div>
+    <!--    <h2>Случайные вопросы из BQA:</h2>-->
+    <table>
+        <thead>
+        <tr>
+            <th>Случайные вопросы из существующей базы вопросов/ответов</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for question in random_questions_BQA %}
+        <tr>
+            <td>{{ question }}</td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<div id="question-container">
+    <label for="question">Вопрос:</label>
+    <input type="text" id="question" name="question">
+    <button onclick="sendQuery()">Отправить</button>
+</div>
+<div id="loader"></div>
+<div id="message-container">
+    <h2>Сообщение:</h2>
+    <p id="message"></p>
+</div>
+<div>
+    <h2 id="answer-title">Ответ:</h2>
+    <p id="answer"></p>
+    <h2>Время выполнения:</h2>
+    <p id="execution_time"></p>
+</div>
+<div id="expert-answer-container">
+    <h2>Ответ эксперта:</h2>
+    <p id="expert-answer"></p>
+</div>
 </body>
 </html>

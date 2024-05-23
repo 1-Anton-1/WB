@@ -10,7 +10,7 @@ import warnings
 warnings.filterwarnings("ignore")
 
 
-def get_answer_openchat(question, max_new_tokens=512, temperature=0.8):
+def get_answer_openchat(question, max_new_tokens=512, temperature=0.6):
     """Функция для генерации ответом с помощью LLM openchat-3.5"""
     s = 'Фрагменты базы знаний:\n'
     s += find_closest_chunk(question)
