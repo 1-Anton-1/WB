@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 import torch
-from data_loader import get_embeddings
+from embeddings import get_embeddings
 
 # Перемещаем модель на GPU, если доступно
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
